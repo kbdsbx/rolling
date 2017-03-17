@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+        <!-- 让部分国产浏览器默认采用高速模式渲染页面 -->
+        <meta name="renderer" content="webkit">
+
+        <title>Demo</title>
+
+        <link rel="stylesheet/less" type="text/css" href="../rolling.less">
+
+        <script src="//cdn.bootcss.com/less.js/2.5.3/less.min.js"></script>
+        <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
+        <script src="../rolling.js"></script>
+        <style>
+#rolling-example-generic {
+    width: 300px;
+    margin: 0 auto;
+}
+#rolling-example-generic-2 {
+    width: 900px;
+    margin: 0 auto;
+}
+img {
+    width: 300px;
+}
+        </style>
+    </head>
+    <body>
+        <!-- silder component -->
+        <div id="rolling-example-generic" class="rolling slide">
+            <!-- Indicators -->
+            <ol class="rolling-indicators">
+                <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="1">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="2">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="3">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="4">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="5">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="6">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="7">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="8">
+                </li>
+            </ol>
+            <!-- Wrapper for slides -->
+            <div class="rolling-inner" role="listbox">
+                <div id="1" class="item active">
+                    <a href="#"><img src="01.jpg"></a>
+                </div>
+                <div id="2" class="item">
+                    <a href="#"><img src="02.jpg"></a>
+                </div>
+                <div id="3" class="item">
+                    <a href="#"><img src="03.jpg"></a>
+                </div>
+                <div id="4" class="item">
+                    <a href="#"><img src="04.jpg"></a>
+                </div>
+                <div id="5" class="item">
+                    <a href="#"><img src="05.jpg"></a>
+                </div>
+                <div id="6" class="item">
+                    <a href="#"><img src="06.jpg"></a>
+                </div>
+                <div id="7" class="item">
+                    <a href="#"><img src="07.jpg"></a>
+                </div>
+                <div id="8" class="item">
+                    <a href="#"><img src="08.jpg"></a>
+                </div>
+                <div id="9" class="item">
+                    <a href="#"><img src="09.jpg"></a>
+                </div>
+            </div>
+        </div>
+        <!-- #silder component -->
+
+        <!-- silder component -->
+        <div id="rolling-example-generic-2" class="rolling slide" data-rolling-cols="3" data-rolling-auto="0">
+            <!-- Indicators -->
+            <ol class="rolling-indicators">
+                <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="1">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="2">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="3">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="4">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="5">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="6">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="7">
+                </li>
+                <li data-target="#rolling-example-generic" data-slide-to="8">
+                </li>
+            </ol>
+            <!-- Wrapper for slides -->
+            <div class="rolling-inner" role="listbox">
+                <div id="1" class="item active">
+                    <a href="#"><img src="01.jpg"></a>
+                </div>
+                <div id="2" class="item">
+                    <a href="#"><img src="02.jpg"></a>
+                </div>
+                <div id="3" class="item">
+                    <a href="#"><img src="03.jpg"></a>
+                </div>
+                <div id="4" class="item">
+                    <a href="#"><img src="04.jpg"></a>
+                </div>
+                <div id="5" class="item">
+                    <a href="#"><img src="05.jpg"></a>
+                </div>
+                <div id="6" class="item">
+                    <a href="#"><img src="06.jpg"></a>
+                </div>
+                <div id="7" class="item">
+                    <a href="#"><img src="07.jpg"></a>
+                </div>
+                <div id="8" class="item">
+                    <a href="#"><img src="08.jpg"></a>
+                </div>
+                <div id="9" class="item">
+                    <a href="#"><img src="09.jpg"></a>
+                </div>
+            </div>
+        </div>
+        <!-- #silder component -->
+
+        <script>
+            $( window ).load( function() {
+                $( '#rolling-example-generic-2' ).jqrolling();
+            } );
+        </script>
+    </body>
+</html>
