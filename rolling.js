@@ -76,7 +76,7 @@ rolling.prototype = {
         _this.auto = _self.is( '[data-rolling-auto]' ) ? parseInt( _self.data( 'rolling-auto' ) ) : 1;
 
         var _w = 0;
-        var _h = _items.find( '.item:not(:hidden)' ).outerHeight();
+        var _item_w = _self.outerWidth() / _this.cols;
 
         _items.each( function( i ) {
             _w += $( this ).outerWidth();
@@ -94,9 +94,6 @@ rolling.prototype = {
         _this.full = _self.width();
 
         _items.filter( ':not(.active)' ).css_transform( -_w, _this.full );
-      
-        _self
-            .css( 'height', _h )
  
         _inner
             .css( 'width', _w )
@@ -165,19 +162,22 @@ rolling.prototype = {
 
             } )
             .on( 'touchend', function( e ) {
-                if ( ( _o_left - _left ) > 10 ) {
-                    _this._move_group( 'next', function() {
-                        _this._rolling();
-                    } );
-                } else if ( ( _o_left - _left ) < -10 ) {
-                    _this._move_group( 'prev', function() {
-                        _this._rolling();
-                    } );
+                var _len = 0;
+                if ( _this.cols === 1 ) {
+                    // 当每组只有一张图片时滚动阈值为10像素
+                    if ( ( _o_left - _left ) > 10 ) {
+                        _len = 1;
+                    }
+                    if ( ( _o_left - _left ) < -10 ) {
+                        _len = -1;
+                    }
                 } else {
-                    _this._move_group( null, function() {
-                        _this._rolling();
-                    } );
+                    // 当每组有多张图片时滚动阈值为半个图片宽度
+                    _len = Math.round( ( _o_left - _left ) / _item_w );
                 }
+                _this._move( _len, function() {
+                    _this._rolling();
+                } );
             } );
 
         _indicators.find( 'li' ).off( 'click' ).on( 'click', function( e ) {
@@ -393,45 +393,58 @@ rolling.prototype = {
         }
     },
     
-    _move : function( pos, callback ) {
+    _move : function( len, callback ) {
         var _this = this;
         var _self = $( this.selector );
         var _inner = _self.find( '.rolling-inner' );
         var _items = _inner.find( '.item' );
         var _indicators = _self.find( '.rolling-indicators' );
-        var _w = _self.outerWidth() / _this.cols;
         var _old = _this.index;
-
-        if ( pos === 'prev' ) {
+        var _len = Math.abs( len );
+        var _w = _self.outerWidth() / _this.cols * _len;
+        var _full_w = _self.outerWidth();
+       
+        if ( len < 0 ) {
+            _this.index = _this._prev( _len );
             
             // go;
             _this._get_item_group( _this._curr() )
-                .css_transform( _w, _this.full )
-                .css_transition_duration( 300 )
-            _this._get_item( _this._prev() )
                 .css_transform( 0, _this.full )
                 .css_transition_duration( 300 )
+            _this._get_item_group( _this._next( _len ) )
+                .css_transform( _w, _this.full )
+                .css_transition_duration( 300 )
 
-            _this.index = _this._prev();
-
-            // prepare;
-            _this._get_item( _this._prev() )
-                .css_transform( -_w, _this.full )
-                .css_transition_duration( 0 )
-        } else if ( pos === 'next' ) {
-            _this.index = _this._next();
+            if ( _len < _this.cols ) {
+                _this._get_item( _this._prev() )
+                    .css_transform( -( _w / _len ), _this.full )
+                    .css_transition_duration( 300 )
+            }
+        } else if ( len > 0 ) {
+            _this.index = _this._next( _len );
 
             _this._get_item_group( _this._curr() )
                 .css_transform( 0, _this.full )
                 .css_transition_duration( 300 )
-            _this._get_item( _this._prev() )
+            _this._get_item_group( _this._prev( _len ) )
                 .css_transform( -_w, _this.full )
                 .css_transition_duration( 300 )
 
-            // prepare;
-            _this._get_item( _this._next( _this.cols ) )
-                .css_transform( _w * _this.cols, _this.full )
-                .css_transition_duration( 0 )
+            if ( _len < _this.cols ) {
+                _this._get_item( _this._next( _this.cols ) )
+                    .css_transform( _full_w, _this.full )
+                    .css_transition_duration( 300 )
+            }
+        } else {
+            _this._get_item_group( _this._curr() )
+                .css_transform( 0, _this.full )
+                .css_transition_duration( 300 )
+            _this._get_item_group( _this._next_group() )
+                .css_transform( _full_w, _this.full )
+                .css_transition_duration( 300 )
+            _this._get_item_group( _this._prev_group() )
+                .css_transform( -_full_w, _this.full )
+                .css_transition_duration( 300 )
         }
         var _new = _this.index;
 
@@ -470,43 +483,83 @@ rolling.prototype = {
         var _inner = _self.find( '.rolling-inner' );
         var _items = _inner.find( '.item' );
         var _indicators = _self.find( '.rolling-indicators' );
+        var len = new_idx - this.index;
+        var _len = Math.abs( len );
+        var _full_w = _self.outerWidth();
+        var _w = _self.outerWidth() / _this.cols;
 
-        if ( new_idx > _this.index ) {
+                console.log( _len );
+        if ( _len <= _this.cols ) {
+            // 当目标图片和当前图片在同一组内
 
-            var old_idx = _this.index;
             _this.index = new_idx;
-            
-            _this._get_item( old_idx )
-                .css_transform( -_self.outerWidth(), _this.full )
-                .css_transition_duration( 300 )
-            _this._get_item( _this._curr(), _this.full )
+
+            _this._get_item_group( _this._curr() )
                 .css_transform( 0, _this.full )
                 .css_transition_duration( 300 )
-            if ( _this._next() !== old_idx ) {
-                _this._get_item( _this._next() )
-                    .css_transform( 0, _this.full )
+            if ( len > 0 ) {
+                _this._get_item_group( _this._next_group() )
+                    .css_transform( _full_w, _this.full )
+                    .css_transition_duration( 0 )
+                _this._get_item_group( _this._prev_group() )
+                    .css_transform( -_full_w, _this.full )
                     .css_transition_duration( 300 )
             }
-        
+            if ( len < 0 ) {
+                _this._get_item_group( _this._next_group() )
+                    .css_transform( _full_w, _this.full )
+                    .css_transition_duration( 300 )
+                _this._get_item_group( _this._prev_group() )
+                    .css_transform( -_full_w, _this.full )
+                    .css_transition_duration( 0 )
+            }
         } else {
-
-            var old_idx = _this.index;
+            // 当目标图片和当前图片不在同一组内
+            var _old_idx = _this.index;
             _this.index = new_idx;
 
-            if ( _this._prev() !== old_idx ) {
-                _this._get_item( _this._curr() )
+            if ( len < 0 ) {
+                _this._get_item_group( _this._curr() )
+                    .css_transform( -_full_w, _this.full )
+                    .css_transition_duration( 0 )
+            }
+            if ( len > 0 ) {
+                _this._get_item_group( _this._curr() )
+                    .css_transform( _full_w, _this.full )
+                    .css_transition_duration( 0 )
+            }
+
+            setTimeout( function() {
+                if ( len < 0 ) {
+                    _this._get_item_group( _old_idx )
+                        .css_transform( _full_w, _this.full )
+                        .css_transition_duration( 300 )
+                    setTimeout( function() {
+                        _this._get_item_group( _this._prev_group() )
+                            .css_transform( -_full_w, _this.full )
+                            .css_transition_duration( 0 )
+                        _this._get_item_group( _this._next_group() )
+                            .css_transform( _full_w, _this.full )
+                            .css_transition_duration( 0 )
+                    }, 300 );
+                }
+                if ( len > 0 ) {
+                    _this._get_item_group( _old_idx )
+                        .css_transform( -_full_w, _this.full )
+                        .css_transition_duration( 300 )
+                    setTimeout( function() {
+                        _this._get_item_group( _this._prev_group() )
+                            .css_transform( -_full_w, _this.full )
+                            .css_transition_duration( 0 )
+                        _this._get_item_group( _this._next_group() )
+                            .css_transform( _full_w, _this.full )
+                            .css_transition_duration( 0 )
+                    }, 300 );
+                }
+                _this._get_item_group( _this._curr() )
                     .css_transform( 0, _this.full )
                     .css_transition_duration( 300 )
-            }
-            _this._get_item( _this._curr() )
-                .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
-                .css( 'transform', 'translate( 0px, 0px ) translateZ( 0px )' )
-                .css( 'transition-duration', '300ms' );
-            _this._get_item( old_idx )
-                .css_transform( _self.outerWidth(), _this.full )
-                .css_transition_duration( 300 )
-
+            }, 0 );
         }
 
         var ua = navigator.userAgent.toLowerCase();
@@ -531,7 +584,6 @@ rolling.prototype = {
             callback.call( _this );
         }
     },
-
 };
 
 $.fn.jqrolling = function( args ) {
