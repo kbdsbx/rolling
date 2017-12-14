@@ -16,138 +16,219 @@
         <script src="//cdn.bootcss.com/jquery/2.2.4/jquery.min.js"></script>
         <script src="../rolling.js"></script>
         <style>
+.rolling-box {
+    width: 100%;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 50px;
+}
+.rolling-box:after {
+    content: "";
+    clear: both;
+    display: table;
+}
 #rolling-example-generic {
     width: 300px;
-    margin: 0 auto;
+    float: left;
+    margin-right: 20px;
 }
 #rolling-example-generic img {
     width: 300px;
 }
 #rolling-example-generic-2 {
-    width: 300px;
-    margin: 0 auto;
+    width: 600px;
+    float: left;
+    margin-right: 20px;
 }
 #rolling-example-generic-2 img {
-    width: 100px;
+    width: 200px;
+}
+#rolling-example-generic-3 {
+    width: 300px;
+    float: left;
+    margin-right: 20px;
+}
+#rolling-example-generic-3 img {
+    width: 300px;
+}
+#rolling-example-generic-4 {
+    width: 900px;
+    float: left;
+    margin-right: 20px;
+}
+#rolling-example-generic-4 img {
+    width: 300px;
 }
         </style>
     </head>
     <body>
-        <!-- silder component -->
-        <div id="rolling-example-generic" class="rolling slide">
-            <!-- Indicators -->
-            <ol class="rolling-indicators">
-                <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="1">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="2">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="3">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="4">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="5">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="6">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="7">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="8">
-                </li>
-            </ol>
-            <!-- Wrapper for slides -->
-            <div class="rolling-inner" role="listbox">
-                <div id="1" class="item active">
-                    <a href="#"><img src="01.jpg"></a>
-                </div>
-                <div id="2" class="item">
-                    <a href="#"><img src="02.jpg"></a>
-                </div>
-                <div id="3" class="item">
-                    <a href="#"><img src="03.jpg"></a>
-                </div>
-                <div id="4" class="item">
-                    <a href="#"><img src="04.jpg"></a>
-                </div>
-                <div id="5" class="item">
-                    <a href="#"><img src="05.jpg"></a>
-                </div>
-                <div id="6" class="item">
-                    <a href="#"><img src="06.jpg"></a>
-                </div>
-                <div id="7" class="item">
-                    <a href="#"><img src="07.jpg"></a>
-                </div>
-                <div id="8" class="item">
-                    <a href="#"><img src="08.jpg"></a>
-                </div>
-                <div id="9" class="item">
-                    <a href="#"><img src="09.jpg"></a>
+
+        <div class="rolling-box">
+            <div id="rolling-example-generic" class="rolling slide">
+                <ol class="rolling-indicators">
+                    <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="1">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="2">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="3">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="4">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="5">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="6">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="7">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="8">
+                    </li>
+                </ol>
+                <div class="rolling-inner">
+                    <div id="1" class="item active">
+                        <a href="#"><img src="01.jpg"></a>
+                    </div>
+                    <div id="2" class="item">
+                        <a href="#"><img src="02.jpg"></a>
+                    </div>
+                    <div id="3" class="item">
+                        <a href="#"><img src="03.jpg"></a>
+                    </div>
+                    <div id="4" class="item">
+                        <a href="#"><img src="04.jpg"></a>
+                    </div>
+                    <div id="5" class="item">
+                        <a href="#"><img src="05.jpg"></a>
+                    </div>
+                    <div id="6" class="item">
+                        <a href="#"><img src="06.jpg"></a>
+                    </div>
+                    <div id="7" class="item">
+                        <a href="#"><img src="07.jpg"></a>
+                    </div>
+                    <div id="8" class="item">
+                        <a href="#"><img src="08.jpg"></a>
+                    </div>
+                    <div id="9" class="item">
+                        <a href="#"><img src="09.jpg"></a>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- #silder component -->
 
-        <!-- silder component -->
-        <div id="rolling-example-generic-2" class="rolling slide" data-rolling-cols="3" data-rolling-auto="0">
-            <!-- Indicators -->
-            <ol class="rolling-indicators">
-                <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="1">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="2">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="3">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="4">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="5">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="6">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="7">
-                </li>
-                <li data-target="#rolling-example-generic" data-slide-to="8">
-                </li>
-            </ol>
-            <!-- Wrapper for slides -->
-            <div class="rolling-inner" role="listbox">
-                <div id="1" class="item active">
-                    <a href="#"><img src="01.jpg"></a>
-                </div>
-                <div id="2" class="item">
-                    <a href="#"><img src="02.jpg"></a>
-                </div>
-                <div id="3" class="item">
-                    <a href="#"><img src="03.jpg"></a>
-                </div>
-                <div id="4" class="item">
-                    <a href="#"><img src="04.jpg"></a>
-                </div>
-                <div id="5" class="item">
-                    <a href="#"><img src="05.jpg"></a>
-                </div>
-                <div id="6" class="item">
-                    <a href="#"><img src="06.jpg"></a>
-                </div>
-                <div id="7" class="item">
-                    <a href="#"><img src="07.jpg"></a>
-                </div>
-                <div id="8" class="item">
-                    <a href="#"><img src="08.jpg"></a>
-                </div>
-                <div id="9" class="item">
-                    <a href="#"><img src="09.jpg"></a>
+        <div class="rolling-box">
+            <div id="rolling-example-generic-2" class="rolling slide" data-rolling-cols="3" data-rolling-auto="0">
+                <ol class="rolling-indicators">
+                    <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="1">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="2">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="3">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="4">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="5">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="6">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="7">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="8">
+                    </li>
+                </ol>
+                <div class="rolling-inner">
+                    <div id="1" class="item active">
+                        <a href="#"><img src="01.jpg"></a>
+                    </div>
+                    <div id="2" class="item">
+                        <a href="#"><img src="02.jpg"></a>
+                    </div>
+                    <div id="3" class="item">
+                        <a href="#"><img src="03.jpg"></a>
+                    </div>
+                    <div id="4" class="item">
+                        <a href="#"><img src="04.jpg"></a>
+                    </div>
+                    <div id="5" class="item">
+                        <a href="#"><img src="05.jpg"></a>
+                    </div>
+                    <div id="6" class="item">
+                        <a href="#"><img src="06.jpg"></a>
+                    </div>
+                    <div id="7" class="item">
+                        <a href="#"><img src="07.jpg"></a>
+                    </div>
+                    <div id="8" class="item">
+                        <a href="#"><img src="08.jpg"></a>
+                    </div>
+                    <div id="9" class="item">
+                        <a href="#"><img src="09.jpg"></a>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- #silder component -->
 
+        <div class="rolling-box">
+            <div id="rolling-example-generic-3" class="rolling slide" data-rolling-auto="0">
+                <ol class="rolling-indicators">
+                    <li data-target="#rolling-example-generic" data-slide-to="0" class="active">
+                    </li>
+                    <li data-target="#rolling-example-generic" data-slide-to="1">
+                    </li>
+                </ol>
+                <div class="rolling-inner">
+                    <div id="1" class="item active">
+                        <a href="#"><img src="01.jpg"></a>
+                    </div>
+                    <div id="2" class="item">
+                        <a href="#"><img src="02.jpg"></a>
+                    </div>
+                    <div id="1" class="item">
+                        <a href="#"><img src="01.jpg"></a>
+                    </div>
+                    <div id="2" class="item">
+                        <a href="#"><img src="02.jpg"></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="rolling-box">
+            <div id="rolling-example-generic-4" class="rolling slide" data-rolling-cols="3" data-rolling-auto="0">
+                <div class="rolling-inner">
+                    <div id="1" class="item active">
+                        <a href="#"><img src="01.jpg"></a>
+                    </div>
+                    <div id="2" class="item">
+                        <a href="#"><img src="02.jpg"></a>
+                    </div>
+                    <div id="3" class="item">
+                        <a href="#"><img src="03.jpg"></a>
+                    </div>
+                    <div id="4" class="item">
+                        <a href="#"><img src="04.jpg"></a>
+                    </div>
+                    <div id="5" class="item">
+                        <a href="#"><img src="05.jpg"></a>
+                    </div>
+                    <div id="6" class="item">
+                        <a href="#"><img src="06.jpg"></a>
+                    </div>
+                </div>
+                <div class="rolling-control">
+                    <div class="left">&lt;</div>
+                    <div class="right">&gt;</div>
+                </div>
+            </div>
+        </div>
         <script>
             $( window ).load( function() {
                 $( '#rolling-example-generic-2' ).jqrolling();
+                $( '#rolling-example-generic-3' ).jqrolling();
+                $( '#rolling-example-generic-4' ).jqrolling();
             } );
         </script>
     </body>

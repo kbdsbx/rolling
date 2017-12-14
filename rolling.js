@@ -6,6 +6,12 @@ function rolling( selector, args ) {
 
     return this;
 }
+function isIE() { //ie?  
+    if (!!window.ActiveXObject || "ActiveXObject" in window)  
+        return true;  
+    else  
+        return false;  
+}
 
 $.fn.css_transform = function( x, full ) {
     var _offset = full / this.length;
@@ -14,27 +20,32 @@ $.fn.css_transform = function( x, full ) {
         $( this[i] )
             .css( '-webkit-transform', 'translate( ' + _x + 'px, 0px ) translateZ( 0px )' )
             .css( '-moz-transform', 'translate( ' + _x + 'px, 0px )' )
-            .css( '-ms-transform', 'translate( ' + _x + 'px, 0px )' )
             .css( '-o-transform', 'translate( ' + _x + 'px, 0px )' )
             .css( 'transform', 'translate( ' + _x + 'px, 0px )' );
-        $( this[i] ).get(0).style.msTransform = 'translate(' + _x + 'px,0px)';
+    }
+
+    if ( isIE() ) {
+        for ( var i = 0; i < this.length; i++ ) {
+            var _idx = parseInt( this.get(i).id ) - 1;
+            var _x = x + _offset * i;
+            var _y = this.get(i).clientHeight * _idx * -1;
+            this.get(i).style.msTransform = 'translate(' + _x + 'px,' + _y + 'px)';
+        }
     }
     
     return this;
-}
-
-$.fn.css_transform_ie = function( x, y ) {
-    this.get(0).style.msTransform = 'translate(' + x + 'px,' + y + 'px)';
 }
 
 $.fn.css_transition_duration = function( ms ) {
     this
         .css( '-webkit-transition-duration', ms + 'ms' )
         .css( '-moz-transition-duration', ms + 'ms' )
-        .css( '-ms-transition-duration', ms + 'ms' )
         .css( '-o-transition-duration', ms + 'ms' )
         .css( 'transition-duration', ms + 'ms' )
         ;
+    for ( var i = 0; i < this.length; i++ ) {
+        this.get(i).msTransitionDuration = ms + 'ms';
+    }
 
     return this;
 }
@@ -49,28 +60,14 @@ rolling.prototype = {
         interval: 3000,
     },
 
-    _set_ie_css : function() {
-        var _this = this;
-        var _self = $( this.selector );
-        var _inner = _self.find( '.rolling-inner' );
-        var _items = _inner.find( '.item' );
-        var _indicators = _self.find( '.rolling-indicators' );
-        var _control_left = _self.find( '.rolling-control.left' );
-        var _control_right = _self.find( '.rolling-control.right' );
-
-        for ( var idx = 0; idx < _items.length; idx++ ) {
-            _items[idx].style.msTransform = 'translate(' + ( _self.outerWidth() * _this.index * 1 ) + 'px,'+(_items[idx].clientHeight * idx * -1)+'px)';
-        }
-    },
-
     _init : function() {
         var _this = this;
         var _self = $( this.selector );
         var _inner = _self.find( '.rolling-inner' );
         var _items = _inner.find( '.item' );
         var _indicators = _self.find( '.rolling-indicators' );
-        var _control_left = _self.find( '.rolling-control.left' );
-        var _control_right = _self.find( '.rolling-control.right' );
+        var _control_left = _self.find( '.rolling-control .left' );
+        var _control_right = _self.find( '.rolling-control .right' );
 
         _this.cols = _self.data( 'rolling-cols' ) ? parseInt( _self.data( 'rolling-cols' ) ) : 1;
         _this.auto = _self.is( '[data-rolling-auto]' ) ? parseInt( _self.data( 'rolling-auto' ) ) : 1;
@@ -116,14 +113,18 @@ rolling.prototype = {
             .css_transition_duration( 0 )
             ;
 
-
-        // only ie
-        for ( var idx = 0; idx < _items.length; idx++ ) {
-            _items[idx].style.msTransitionDuration = '0ms';
-            _items[idx].style.msTransform = 'translate(' + ( _self.outerWidth() * _this.index * 1 ) + 'px,'+(_items[idx].clientHeight * idx * -1)+'px)';
+        if ( isIE() ) {
+            for ( var idx = 0; idx < _items.length; idx++ ) {
+                _items[idx].style.left = '0';
+                _items[idx].style.msTransitionDuration = '0ms';
+                _items[idx].style.msTransform = 'translate(' + ( _self.outerWidth() / _this.cols * idx ) + 'px,'+(_items[idx].clientHeight * idx * -1)+'px)';
+            }
         }
 
         _this._rolling();
+
+        var _temp_item;
+        var _moved = false;     // 点击时会触发start和end但不会触发move，需要以此作为判断
 
         var _o_left, _left;
         _self
@@ -135,31 +136,48 @@ rolling.prototype = {
                 e.stopPropagation();
             } )
             .on( 'touchmove', function( e ) {
+                _moved = true;
                 var touch = e.originalEvent.touches[0];
 
                 var _m = touch.pageX - _o_left;
 
-                if ( _items.length === 2 && _m > 0 ) {
-                    return;
-                }
+                if ( _items.length === -1 ) {
+ 
+                    _temp_item
+                        .css_transform( -_self.outerWidth() + _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
+
+                    _this._get_item_group( _this._curr() )
+                        .css_transform( _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
+
+                    _this._get_item_group( _this._next_group() )
+                        .css_transform( _self.outerWidth() + _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
+
+                    _left = touch.pageX;
+                } else {
                  
-                _this._get_item_group( _this._prev_group() )
-                    .css_transform( -_self.outerWidth() + _m, _this.full )
-                    .css_transition_duration( 0 )
-                    ;
+                    _this._get_item_group( _this._prev_group() )
+                        .css_transform( -_self.outerWidth() + _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
 
-                _this._get_item_group( _this._curr() )
-                    .css_transform( _m, _this.full )
-                    .css_transition_duration( 0 )
-                    ;
+                    _this._get_item_group( _this._curr() )
+                        .css_transform( _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
 
-                _this._get_item_group( _this._next_group() )
-                    .css_transform( _self.outerWidth() + _m, _this.full )
-                    .css_transition_duration( 0 )
-                    ;
+                    _this._get_item_group( _this._next_group() )
+                        .css_transform( _self.outerWidth() + _m, _this.full )
+                        .css_transition_duration( 0 )
+                        ;
 
-                _left = touch.pageX;
-
+                    _left = touch.pageX;
+                }
             } )
             .on( 'touchend', function( e ) {
                 var _len = 0;
@@ -175,13 +193,17 @@ rolling.prototype = {
                     // 当每组有多张图片时滚动阈值为半个图片宽度
                     _len = Math.round( ( _o_left - _left ) / _item_w );
                 }
-                _this._move( _len, function() {
-                    _this._rolling();
-                } );
+                if ( _moved ) {
+                    _this._move( _len, function() {
+                        _this._rolling();
+                    } );
+                }
+                _moved = false;
             } );
 
         _indicators.find( 'li' ).off( 'click' ).on( 'click', function( e ) {
             e.preventDefault();
+            e.stopPropagation();
             _this._touch();
             _this._goto( parseInt( $( this ).data( 'slide-to' ) ), function() {
                 _this._rolling();
@@ -190,6 +212,7 @@ rolling.prototype = {
 
         _control_left.off( 'click' ).on( 'click', function( e ) {
             e.preventDefault();
+            e.stopPropagation();
             _this._touch();
             _this._move_group( 'prev', function() {
                 _this._rolling();
@@ -199,6 +222,7 @@ rolling.prototype = {
 
         _control_right.off( 'click' ).on( 'click', function( e ) {
             e.preventDefault();
+            e.stopPropagation();
             _this._touch();
             _this._move_group( 'next', function() {
                 _this._rolling();
@@ -289,10 +313,6 @@ rolling.prototype = {
         var _inner = _self.find( '.rolling-inner' );
         var _items = _inner.find( '.item' );
 
-        if ( _items.length < 2 ) {
-            return;
-        }
-
         if ( _this.auto ) {
             this._ = setInterval( function() {
                 _this._move_group( 'next' );
@@ -311,64 +331,69 @@ rolling.prototype = {
 
         if ( pos === 'prev' ) {
             _this.index = _this._prev_group();
-            if ( _this._prev_group() !== _this._next_group() ) {
-                _this._get_item_group( _this._prev_group() )
-                    .css_transform( -_self.outerWidth(), _this.full )
-                    .css_transition_duration( 0 )
-            } else {
-                setTimeout( function() {
-                _this._get_item_group( _this._prev_group() )
-                    .css_transform( -_self.outerWidth(), _this.full )
-                    .css_transition_duration( 0 )
-                    _this._set_ie_css();
-                }, 300 );
-            }
             _this._get_item_group( _this._curr() )
-                .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
-            _this._get_item_group( _this._next_group() )
-                .css_transform( _self.outerWidth(), _this.full )
-                .css_transition_duration( 300 )
-        } else if ( pos === 'next' ) {
-            _this.index = _this._next_group();
-            _this._get_item_group( _this._prev_group() )
                 .css_transform( -_self.outerWidth(), _this.full )
-                .css_transition_duration( 300 )
-            _this._get_item_group( _this._curr() )
-                .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
 
             if ( _this._prev_group() !== _this._next_group() ) {
-                _this._get_item_group( _this._next_group() )
-                    .css_transform( _self.outerWidth(), _this.full )
+                _this._get_item_group( _this._prev_group() )
                     .css_transition_duration( 0 )
-            } else {
-                setTimeout( function() {
-                    _this._get_item_group( _this._next_group() )
-                        .css_transform( _self.outerWidth(), _this.full )
-                        .css_transition_duration( 0 )
-                        _this._set_ie_css();
-                }, 300 );
+                    .css_transform( -_self.outerWidth(), _this.full )
+            }
+            // 延迟0秒用以刷新上面的设置
+            setTimeout( function() {
+                _this._get_item_group( _this._curr() )
+                    .css_transition_duration( 300 )
+                    .css_transform( 0, _this.full )
+                _this._get_item_group( _this._next_group() )
+                    .css_transition_duration( 300 )
+                    .css_transform( _self.outerWidth(), _this.full )
+            }, 0 );
+        } else if ( pos === 'next' ) {
+            _this.index = _this._next_group();
+            _this._get_item_group( _this._curr() )
+                .css_transform( _self.outerWidth(), _this.full )
+
+            setTimeout( function() {
+                _this._get_item_group( _this._prev_group() )
+                    .css_transition_duration( 300 )
+                    .css_transform( -_self.outerWidth(), _this.full )
+                _this._get_item_group( _this._curr() )
+                    .css_transition_duration( 300 )
+                    .css_transform( 0, _this.full )
+            }, 0 );
+
+            // 延迟0秒用以刷新上面的设置
+            if ( _this._prev_group() !== _this._next_group() ) {
+                _this._get_item_group( _this._next_group() )
+                    .css_transition_duration( 0 )
+                    .css_transform( _self.outerWidth(), _this.full )
             }
         } else {
             _this._get_item_group( _this._prev_group() )
-                .css_transform( -_self.outerWidth(), _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( -_self.outerWidth(), _this.full )
                 ;
             _this._get_item_group( _this._curr() )
-                .css_transform( 0, _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( 0, _this.full )
                 ;
             _this._get_item_group( _this._next_group() )
-                .css_transform( _self.outerWidth(), _this.full )
                 .css_transition_duration( 0 )
+                .css_transform( _self.outerWidth(), _this.full )
                 ;
         }
 
+        // 滚动结束后删除所有延时
+        setTimeout( function() {
+            _items
+                .css_transition_duration( 0 )
+        }, 300 );
+
         var _new = _this.index;
 
-        if ( _new != _old )
+        if ( _new != _old ) {
             _self.trigger( 'rolling', [ _new, _old ] );
+        }
 
         var ua = navigator.userAgent.toLowerCase();
         var fmatch = ua.match( /firefox\/([\d.]+)/ );
@@ -377,15 +402,15 @@ rolling.prototype = {
             // only firefox [mozilla lte 49.0]
             _items.css( '-moz-transform', 'translate( ' + ( _self.outerWidth() * _this.index * -1 ) + 'px, 0px )' );
         }
-        // only ie
-        _this._set_ie_css();
 
         _indicators
             .find( 'li' )
             .removeClass( 'active' );
 
+        var _id = parseInt( _this._get_item( _this.index ).attr( 'id' ) ) - 1;
+
         _indicators
-            .find( 'li:eq(' + _this.index + ')' )
+            .find( 'li[data-slide-to="' + _id + '"]' )
             .addClass( 'active' );
 
         if ( "undefined" !== typeof callback ) {
@@ -409,42 +434,42 @@ rolling.prototype = {
             
             // go;
             _this._get_item_group( _this._curr() )
+                .css_transition_duration( 300 )
                 .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
             _this._get_item_group( _this._next( _len ) )
-                .css_transform( _w, _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( _w, _this.full )
 
             if ( _len < _this.cols ) {
                 _this._get_item( _this._prev() )
-                    .css_transform( -( _w / _len ), _this.full )
                     .css_transition_duration( 300 )
+                    .css_transform( -( _w / _len ), _this.full )
             }
         } else if ( len > 0 ) {
             _this.index = _this._next( _len );
 
             _this._get_item_group( _this._curr() )
+                .css_transition_duration( 300 )
                 .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
             _this._get_item_group( _this._prev( _len ) )
-                .css_transform( -_w, _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( -_w, _this.full )
 
             if ( _len < _this.cols ) {
                 _this._get_item( _this._next( _this.cols ) )
-                    .css_transform( _full_w, _this.full )
                     .css_transition_duration( 300 )
+                    .css_transform( _full_w, _this.full )
             }
         } else {
             _this._get_item_group( _this._curr() )
+                .css_transition_duration( 300 )
                 .css_transform( 0, _this.full )
-                .css_transition_duration( 300 )
             _this._get_item_group( _this._next_group() )
+                .css_transition_duration( 300 )
                 .css_transform( _full_w, _this.full )
-                .css_transition_duration( 300 )
             _this._get_item_group( _this._prev_group() )
-                .css_transform( -_full_w, _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( -_full_w, _this.full )
         }
         var _new = _this.index;
 
@@ -458,15 +483,15 @@ rolling.prototype = {
             // only firefox [mozilla lte 49.0]
             _items.css( '-moz-transform', 'translate( ' + ( _w * _this.index * -1 ) + 'px, 0px )' );
         }
-        // only ie
-        _this._set_ie_css();
 
         _indicators
             .find( 'li' )
             .removeClass( 'active' );
 
+        var _id = parseInt( _this._get_item( _this.index ).attr( 'id' ) ) - 1;
+
         _indicators
-            .find( 'li:eq(' + _this.index + ')' )
+            .find( 'li[data-slide-to="' + _id + '"]' )
             .addClass( 'active' );
 
         if ( "undefined" !== typeof callback ) {
@@ -488,30 +513,29 @@ rolling.prototype = {
         var _full_w = _self.outerWidth();
         var _w = _self.outerWidth() / _this.cols;
 
-                console.log( _len );
         if ( _len <= _this.cols ) {
             // 当目标图片和当前图片在同一组内
 
             _this.index = new_idx;
 
             _this._get_item_group( _this._curr() )
-                .css_transform( 0, _this.full )
                 .css_transition_duration( 300 )
+                .css_transform( 0, _this.full )
             if ( len > 0 ) {
                 _this._get_item_group( _this._next_group() )
-                    .css_transform( _full_w, _this.full )
                     .css_transition_duration( 0 )
+                    .css_transform( _full_w, _this.full )
                 _this._get_item_group( _this._prev_group() )
-                    .css_transform( -_full_w, _this.full )
                     .css_transition_duration( 300 )
+                    .css_transform( -_full_w, _this.full )
             }
             if ( len < 0 ) {
                 _this._get_item_group( _this._next_group() )
-                    .css_transform( _full_w, _this.full )
                     .css_transition_duration( 300 )
+                    .css_transform( _full_w, _this.full )
                 _this._get_item_group( _this._prev_group() )
-                    .css_transform( -_full_w, _this.full )
                     .css_transition_duration( 0 )
+                    .css_transform( -_full_w, _this.full )
             }
         } else {
             // 当目标图片和当前图片不在同一组内
@@ -520,45 +544,45 @@ rolling.prototype = {
 
             if ( len < 0 ) {
                 _this._get_item_group( _this._curr() )
-                    .css_transform( -_full_w, _this.full )
                     .css_transition_duration( 0 )
+                    .css_transform( -_full_w, _this.full )
             }
             if ( len > 0 ) {
                 _this._get_item_group( _this._curr() )
-                    .css_transform( _full_w, _this.full )
                     .css_transition_duration( 0 )
+                    .css_transform( _full_w, _this.full )
             }
 
             setTimeout( function() {
                 if ( len < 0 ) {
                     _this._get_item_group( _old_idx )
-                        .css_transform( _full_w, _this.full )
                         .css_transition_duration( 300 )
+                        .css_transform( _full_w, _this.full )
                     setTimeout( function() {
                         _this._get_item_group( _this._prev_group() )
+                            .css_transition_duration( 0 )
                             .css_transform( -_full_w, _this.full )
-                            .css_transition_duration( 0 )
                         _this._get_item_group( _this._next_group() )
-                            .css_transform( _full_w, _this.full )
                             .css_transition_duration( 0 )
+                            .css_transform( _full_w, _this.full )
                     }, 300 );
                 }
                 if ( len > 0 ) {
                     _this._get_item_group( _old_idx )
-                        .css_transform( -_full_w, _this.full )
                         .css_transition_duration( 300 )
+                        .css_transform( -_full_w, _this.full )
                     setTimeout( function() {
                         _this._get_item_group( _this._prev_group() )
+                            .css_transition_duration( 0 )
                             .css_transform( -_full_w, _this.full )
-                            .css_transition_duration( 0 )
                         _this._get_item_group( _this._next_group() )
-                            .css_transform( _full_w, _this.full )
                             .css_transition_duration( 0 )
+                            .css_transform( _full_w, _this.full )
                     }, 300 );
                 }
                 _this._get_item_group( _this._curr() )
-                    .css_transform( 0, _this.full )
                     .css_transition_duration( 300 )
+                    .css_transform( 0, _this.full )
             }, 0 );
         }
 
@@ -569,15 +593,15 @@ rolling.prototype = {
             // only firefox [mozilla lte 49.0]
             _items.css( '-moz-transform', 'translate( ' + ( _self.outerWidth() * _this.index * -1 ) + 'px, 0px )' );
         }
-        // only ie
-        _this._set_ie_css();
         
         _indicators
             .find( 'li' )
             .removeClass( 'active' );
 
+        var _id = parseInt( _this._get_item( _this.index ).attr( 'id' ) ) - 1;
+
         _indicators
-            .find( 'li:eq(' + _this.index + ')' )
+            .find( 'li[data-slide-to="' + _id + '"]' )
             .addClass( 'active' );
 
         if ( "undefined" !== typeof callback ) {
@@ -590,6 +614,6 @@ $.fn.jqrolling = function( args ) {
     $( this ).data( 'rolling', new rolling( this ) );
 }
 
-$( window ).load( function() {
+$( window ).on( 'load', function() {
     $( '#rolling-example-generic' ).jqrolling();
 } );
